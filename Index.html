@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="no">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tidvokterens Domene – Mysteriekviss</title>
+  <style>
+    :root{
+      --bg:#07080c; --card:#0e111a; --text:#e9eefc; --muted:#aab4d4;
+      --accent:#7aa2ff; --good:#4ade80; --bad:#fb7185; --line:#232a3f;
+      --shadow: 0 10px 30px rgba(0,0,0,.45);
+      --radius: 18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+      background: radial-gradient(1200px 900px at 30% 20%, rgba(122,162,255,.13), transparent 55%),
+                  radial-gradient(1000px 700px at 70% 80%, rgba(251,113,133,.10), transparent 55%),
+                  var(--bg);
+      color:var(--text); font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Arial,sans-serif;
+      line-height:1.4;
+      padding:22px;
+    }
+    .wrap{width:min(860px,100%);}
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)), var(--card);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    header{
+      padding:22px 22px 14px 22px;
+      border-bottom:1px solid var(--line);
+    }
+    h1{margin:0; font-size:1.25rem; letter-spacing:.2px;}
+    .sub{margin-top:8px; color:var(--muted); font-size:.98rem}
+    .content{padding:22px;}
+    .sectionTitle{
+      font-size:1.05rem; margin:0 0 10px 0;
+      display:flex; align-items:center; gap:10px;
+    }
+    .pill{
+      font-size:.78rem; color:rgba(255,255,255,.85);
+      background: rgba(122,162,255,.12);
+      border:1px solid rgba(122,162,255,.25);
+      padding:4px 10px; border-radius:999px;
+    }
+    .story{
+      margin:12px 0 16px 0; color:var(--muted);
+      border-left: 3px solid rgba(122,162,255,.35);
+      padding-left:12px;
+    }
+    .prompt{
+      margin:14px 0 10px 0; font-weight:600;
+    }
+    .codeblock{
+      background: rgba(0,0,0,.25);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 14px;
+      padding: 12px 14px;
+      color: rgba(233,238,252,.92);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      white-space:pre-wrap;
+    }
+    .row{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;}
+    input[type="text"]{
+      flex: 1 1 320px;
+      background: rgba(0,0,0,.25);
+      border: 1px solid rgba(255,255,255,.10);
+      color: var(--text);
+      padding: 12px 12px;
+      border-radius: 14px;
+      outline: none;
+      font-size: 1rem;
+    }
+    input[type="text"]:focus{border-color: rgba(122,162,255,.45); box-shadow:0 0 0 3px rgba(122,162,255,.12)}
+    button{
+      background: rgba(122,162,255,.14);
+      border: 1px solid rgba(122,162,255,.30);
+      color: var(--text);
+      padding: 12px 14px;
+      border-radius: 14px;
+      cursor:pointer;
+      font-weight:600;
+      transition: transform .05s ease, background .2s ease, border-color .2s ease;
+      user-select:none;
+    }
+    button:active{transform: translateY(1px)}
+    button:hover{background: rgba(122,162,255,.18); border-color: rgba(122,162,255,.42)}
+    .ghost{
+      background: transparent;
+      border-color: rgba(255,255,255,.14);
+      color: rgba(233,238,252,.9);
+    }
+    .ghost:hover{background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.20)}
+    .msg{
+      margin-top:12px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      color: var(--muted);
+    }
+    .msg.good{border-color: rgba(74,222,128,.32); background: rgba(74,222,128,.08); color: rgba(233,238,252,.94)}
+    .msg.bad{border-color: rgba(251,113,133,.32); background: rgba(251,113,133,.08); color: rgba(233,238,252,.94)}
+    .progress{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px; flex-wrap:wrap;
+      padding: 14px 22px;
+      border-top:1px solid var(--line);
+      color: var(--muted);
+      font-size: .92rem;
+    }
+    .bar{
+      position:relative; flex:1 1 260px; height:10px;
+      background: rgba(255,255,255,.06);
+      border-radius:999px; overflow:hidden;
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .bar > span{
+      position:absolute; inset:0 auto 0 0;
+      width:0%;
+      background: linear-gradient(90deg, rgba(122,162,255,.85), rgba(74,222,128,.85));
+    }
+    .finalCode{
+      margin-top:14px;
+      padding:14px;
+      border-radius: 16px;
+      border:1px dashed rgba(122,162,255,.40);
+      background: rgba(122,162,255,.08);
+    }
+    .finalCode .label{color: rgba(233,238,252,.92); font-weight:800; letter-spacing:.2px}
+    .finalCode .value{
+      margin-top:8px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size:1.05rem;
+      white-space: pre-wrap;
+    }
+    .tiny{font-size:.85rem; color: var(--muted)}
+    .hide{display:none !important;}
+    .footerNote{margin-top:12px; color:var(--muted); font-size:.88rem}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <h1>🕯️ Tidvokterens Domene</h1>
+        <div class="sub">
+          Fri-svar mysteriekviss i fem deler. Du kommer ikke videre før svaret er korrekt.
+          På slutten får du en kode som må skrives ned.
+        </div>
+      </header>
+
+      <div class="content">
+        <!-- START / INTRO -->
+        <div id="screen-intro">
+          <h2 class="sectionTitle"><span class="pill">START</span> Testamentet</h2>
+          <div class="story">
+            <p style="margin:0">
+              <em>Tidvokteren døde uten navn.</em><br/>
+              Ikke fordi han manglet ett – men fordi navnet hans ikke lenger tilhørte tid.<br/><br/>
+              Fem prøver ble etterlatt. Ikke for å teste intelligens, men <strong>retten til å vite</strong>.
+            </p>
+          </div>
+          <div class="prompt">Skriv navnet ditt (valgfritt):</div>
+          <div class="row">
+            <input id="playerName" type="text" autocomplete="off" placeholder="Andreas, Sander, … (valgfritt)" />
+            <button id="btnStart">Start</button>
+          </div>
+          <div class="footerNote">
+            Tips: Svarene ignorerer store/små bokstaver og ekstra mellomrom. Men tegnsetting må stemme der det er relevant.
+          </div>
+        </div>
+
+        <!-- QUIZ -->
+        <div id="screen-quiz" class="hide">
+          <h2 class="sectionTitle">
+            <span class="pill" id="partPill">DEL I</span>
+            <span id="partTitle">STILLHETEN</span>
+          </h2>
+
+          <div class="story" id="storyText"></div>
+
+          <div class="codeblock" id="clueBlock" aria-label="Ledetråd"></div>
+
+          <div class="prompt" id="questionText"></div>
+
+          <div class="row">
+            <input id="answerInput" type="text" autocomplete="off" placeholder="Skriv svaret her…" />
+            <button id="btnCheck">Sjekk svar</button>
+            <button id="btnReset" class="ghost" title="Nullstill fremdrift lokalt">Nullstill</button>
+          </div>
+
+          <div id="message" class="msg hide"></div>
+
+          <div id="finalArea" class="finalCode hide">
+            <div class="label">KODE – skriv den ned:</div>
+            <div class="value" id="finalCodeValue"></div>
+            <div class="row" style="margin-top:12px">
+              <button id="btnCopy">Kopier kode</button>
+              <button id="btnRestart" class="ghost">Start på nytt</button>
+            </div>
+            <div class="tiny" id="finishMeta"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="progress">
+        <div id="progressText">Klar når du er.</div>
+        <div class="bar" aria-label="Fremdrift"><span id="barFill"></span></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  /**
+   * KONFIG – endre her for å tilpasse gåtene/svarene/koden.
+   * - accepted: liste over godkjente svar (fri tekst). Sjekkes case-insensitivt.
+   * - clue: vises i "codeblock" som ledetråd / tekst / tabell.
+   */
+  const QUIZ = [
+    {
+      pill: "DEL I",
+      title: "STILLHETEN",
+      story: "«Alt som varer, gjør det i stillhet.»",
+      clue:
+`TID      STEMME      STØY      EVIGHET      STILLHET`,
+      question: "Hvilket ord bryter mønsteret?",
+      accepted: ["støy"],
+      success: "✔ Riktig. Nøkkelord mottatt: STILLHET"
+    },
+    {
+      pill: "DEL II",
+      title: "URET UTEN VISERE",
+      story: "«Alt må passere midten før det kan forlates.»",
+      clue:
+`06:00 – 12:00 – 18:00`,
+      question: "Hvilket tidspunkt representerer balanse?",
+      accepted: ["12:00", "12.00"],
+      success: "✔ Riktig. Nøkkelord mottatt: MIDTEN"
+    },
+    {
+      pill: "DEL III",
+      title: "DET FORBUDTE ARKIVET",
+      story: "Du finner en setning med uthevede bokstaver. Noe holder igjen.",
+      clue:
+`T empus
+E st
+N oster
+E xamen`,
+      question: "Hvilket ord dannes av de uthevede bokstavene?",
+      accepted: ["tene"],
+      success: "✔ Riktig. Nøkkelord mottatt: HOLDE"
+    },
+    {
+      pill: "DEL IV",
+      title: "DOMMEN",
+      story: "Fire påstander. Tre lyver. Én taler sant.",
+      clue:
+`1. Tiden leger alt
+2. Tiden avslører alt
+3. Tiden kan eies
+4. Tiden kan stoppes`,
+      question: "Hvilken påstand er sann ifølge Tidvokteren?",
+      accepted: [
+        "tiden avslører alt",
+        "tiden avslører alt."
+      ],
+      success: "✔ Riktig. Nøkkelord mottatt: AVSLØRER"
+    },
+    {
+      pill: "DEL V",
+      title: "FINALE: STEMMEN",
+      story: "«Kunnskap skrevet kan stjeles. Kunnskap uttalt kan ikke tas tilbake.»",
+      clue:
+`Nøkkelordene er:
+STILLHET
+MIDTEN
+HOLDE
+AVSLØRER`,
+      question: "Sett nøkkelordene sammen til én setning – slik Tidvokteren krevde den sagt.",
+      accepted: [
+        "i stillhet holdes midten, og tiden avslører.",
+        "i stillhet holdes midten, og tiden avslører"
+      ],
+      success: "✔ Riktig. Du har fullført."
+    }
+  ];
+
+  // KODEN som gis etter siste riktige svar (det deltakeren må skrive ned).
+  // Kan være ord, setning eller tallkode. Bytt fritt.
+  const FINAL_REWARD = "VERITAS TEMPORIS FILIA";
+
+  // --- UI refs
+  const intro = document.getElementById("screen-intro");
+  const quiz = document.getElementById("screen-quiz");
+
+  const playerNameInput = document.getElementById("playerName");
+  const btnStart = document.getElementById("btnStart");
+
+  const partPill = document.getElementById("partPill");
+  const partTitle = document.getElementById("partTitle");
+  const storyText = document.getElementById("storyText");
+  const clueBlock = document.getElementById("clueBlock");
+  const questionText = document.getElementById("questionText");
+  const answerInput = document.getElementById("answerInput");
+  const btnCheck = document.getElementById("btnCheck");
+  const btnReset = document.getElementById("btnReset");
+  const message = document.getElementById("message");
+
+  const progressText = document.getElementById("progressText");
+  const barFill = document.getElementById("barFill");
+
+  const finalArea = document.getElementById("finalArea");
+  const finalCodeValue = document.getElementById("finalCodeValue");
+  const btnCopy = document.getElementById("btnCopy");
+  const btnRestart = document.getElementById("btnRestart");
+  const finishMeta = document.getElementById("finishMeta");
+
+  // --- State (persisted locally)
+  const STORAGE_KEY = "tidvokter_quiz_v1";
+  let state = loadState();
+
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return { startedAt: null, finishedAt: null, idx: 0, name: "" };
+      const parsed = JSON.parse(raw);
+      return {
+        startedAt: parsed.startedAt ?? null,
+        finishedAt: parsed.finishedAt ?? null,
+        idx: Number.isFinite(parsed.idx) ? parsed.idx : 0,
+        name: typeof parsed.name === "string" ? parsed.name : ""
+      };
+    }catch{
+      return { startedAt: null, finishedAt: null, idx: 0, name: "" };
+    }
+  }
+  function saveState(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  // --- Helpers
+  function norm(s){
+    // Case-insensitive, trims, collapses whitespace.
+    return (s ?? "")
+      .toString()
+      .trim()
+      .replace(/\s+/g, " ")
+      .toLowerCase();
+  }
+  function setMsg(kind, text){
+    message.classList.remove("hide","good","bad");
+    message.classList.add(kind === "good" ? "good" : "bad");
+    message.textContent = text;
+  }
+  function clearMsg(){
+    message.classList.add("hide");
+    message.textContent = "";
+    message.classList.remove("good","bad");
+  }
+  function setProgress(){
+    const total = QUIZ.length;
+    const done = Math.min(state.idx, total);
+    const pct = Math.round((done/total)*100);
+    barFill.style.width = pct + "%";
+    if(state.finishedAt){
+      progressText.textContent = `Fullført (${total}/${total}).`;
+    }else{
+      progressText.textContent = `Fremdrift: ${done}/${total}`;
+    }
+  }
+  function formatWhen(ms){
+    if(!ms) return "";
+    try{
+      const d = new Date(ms);
+      return d.toLocaleString("no-NO", { dateStyle:"medium", timeStyle:"medium" });
+    }catch{
+      return String(ms);
+    }
+  }
+  function durationMs(a,b){
+    if(!a || !b) return null;
+    return Math.max(0, b-a);
+  }
+  function formatDuration(ms){
+    if(ms==null) return "";
+    const sec = Math.round(ms/1000);
+    const m = Math.floor(sec/60);
+    const s = sec % 60;
+    if(m<=0) return `${s}s`;
+    return `${m}m ${String(s).padStart(2,"0")}s`;
+  }
+
+  // --- Rendering
+  function showIntro(){
+    intro.classList.remove("hide");
+    quiz.classList.add("hide");
+    finalArea.classList.add("hide");
+    clearMsg();
+    setProgress();
+    playerNameInput.value = state.name || "";
+  }
+
+  function showStep(){
+    intro.classList.add("hide");
+    quiz.classList.remove("hide");
+    finalArea.classList.add("hide");
+    clearMsg();
+
+    const i = Math.min(state.idx, QUIZ.length-1);
+    const step = QUIZ[i];
+
+    partPill.textContent = step.pill;
+    partTitle.textContent = step.title;
+
+    storyText.innerHTML = `<p style="margin:0">${escapeHtml(step.story)}</p>`;
+    clueBlock.textContent = step.clue;
+    questionText.textContent = step.question;
+
+    answerInput.value = "";
+    answerInput.focus();
+    setProgress();
+  }
+
+  function showFinal(){
+    intro.classList.add("hide");
+    quiz.classList.remove("hide");
+    clearMsg();
+
+    // Keep last step info on screen but lock input
+    partPill.textContent = "FULLFØRT";
+    partTitle.textContent = "TESTAMENTET ER FORSEGLET";
+
+    storyText.innerHTML = `<p style="margin:0">Du sa det. Nå bærer du det. Tidvokteren trengs ikke lenger.</p>`;
+    clueBlock.textContent = "Dette kan ikke tas tilbake.";
+    questionText.textContent = "Skriv ned koden under. Den vises bare her.";
+
+    answerInput.value = "";
+    answerInput.disabled = true;
+    btnCheck.disabled = true;
+
+    finalCodeValue.textContent = FINAL_REWARD;
+    finalArea.classList.remove("hide");
+
+    const took = formatDuration(durationMs(state.startedAt, state.finishedAt));
+    const who = state.name ? `Navn: ${state.name}. ` : "";
+    finishMeta.textContent = `${who}Start: ${formatWhen(state.startedAt)} · Fullført: ${formatWhen(state.finishedAt)} · Tid: ${took}`;
+    setProgress();
+  }
+
+  function escapeHtml(str){
+    return String(str)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  // --- Logic
+  function startQuiz(){
+    state.name = (playerNameInput.value || "").trim();
+    if(!state.startedAt) state.startedAt = Date.now();
+    saveState();
+    state.idx = Math.max(0, Math.min(state.idx, QUIZ.length));
+    if(state.finishedAt){
+      showFinal();
+    }else{
+      showStep();
+    }
+  }
+
+  function checkAnswer(){
+    clearMsg();
+    const i = state.idx;
+    const step = QUIZ[i];
+    const user = norm(answerInput.value);
+
+    const ok = step.accepted.map(norm).includes(user);
+
+    if(!ok){
+      setMsg("bad", "✖ Feil. Du kommer ikke videre. Les igjen – og prøv på nytt.");
+      answerInput.select();
+      return;
+    }
+
+    // Correct
+    setMsg("good", step.success);
+
+    // advance
+    state.idx = i + 1;
+
+    if(state.idx >= QUIZ.length){
+      // finished
+      state.finishedAt = Date.now();
+      saveState();
+      // small pause for feedback
+      setTimeout(showFinal, 350);
+    }else{
+      saveState();
+      setTimeout(showStep, 450);
+    }
+  }
+
+  function resetAll(){
+    if(!confirm("Nullstille fremdrift på denne enheten?")) return;
+    localStorage.removeItem(STORAGE_KEY);
+    state = loadState();
+    answerInput.disabled = false;
+    btnCheck.disabled = false;
+    showIntro();
+  }
+
+  async function copyFinal(){
+    try{
+      await navigator.clipboard.writeText(FINAL_REWARD);
+      setMsg("good", "✔ Koden er kopiert. Skriv den ned også, for sikkerhets skyld.");
+    }catch{
+      setMsg("bad", "Kunne ikke kopiere automatisk. Marker og kopier koden manuelt.");
+    }
+  }
+
+  function restartFromFinal(){
+    localStorage.removeItem(STORAGE_KEY);
+    state = loadState();
+    answerInput.disabled = false;
+    btnCheck.disabled = false;
+    showIntro();
+  }
+
+  // --- Events
+  btnStart.addEventListener("click", startQuiz);
+  playerNameInput.addEventListener("keydown", (e)=>{ if(e.key==="Enter") startQuiz(); });
+
+  btnCheck.addEventListener("click", checkAnswer);
+  answerInput.addEventListener("keydown", (e)=>{ if(e.key==="Enter") checkAnswer(); });
+
+  btnReset.addEventListener("click", resetAll);
+  btnCopy.addEventListener("click", copyFinal);
+  btnRestart.addEventListener("click", restartFromFinal);
+
+  // --- Init (resume)
+  setProgress();
+  if(state.finishedAt){
+    showFinal();
+  }else if(state.startedAt){
+    showStep();
+  }else{
+    showIntro();
+  }
+</script>
+</body>
+</html>
